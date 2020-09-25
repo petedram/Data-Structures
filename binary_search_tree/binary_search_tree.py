@@ -10,6 +10,25 @@ This part of the project comprises two days:
 2. Implement the `in_order_print`, `bft_print`, and `dft_print` methods
    on the BSTNode class.
 """
+class Queue:
+    def __init__(self):
+        self.size = 0
+        self.storage = []
+    
+    def __len__(self):
+        return self.size
+
+    def enqueue(self, value):
+        self.storage.append(value)
+        self.size += 1
+
+    def dequeue(self):
+        if self.size > 0:
+            self.size -= 1
+            return self.storage.pop(0)
+        return None
+
+
 class BSTNode:
     def __init__(self, value):
         self.value = value
@@ -69,42 +88,130 @@ class BSTNode:
     # Call the function `fn` on the value of each node
     def for_each(self, fn):
         #one side then the other
-        def fnt(curr):
-            fn(curr.value)
-            if curr.left:
-                fnt(curr.left)
-            if curr.right:
-                fnt(curr.right)
-        fnt(self)
+        fn(self.value)
+
+        #base case - no children
+        if self.left is None and self.right is None:
+            return
+
+        #recursive case - 1 or more children
+        #go left and call fn on each node
+        if self.left:
+            self.left.for_each(fn)
+
+        #go right and call fn on each node
+        if self.right:
+            self.right.for_each(fn)
 
 
     # Part 2 -----------------------
 
+    # https://www.geeksforgeeks.org/tree-traversals-inorder-preorder-and-postorder/
+
+
+
     # Print all the values in order from low to high
     # Hint:  Use a recursive, depth first traversal
     def in_order_print(self):
-        pass
+        # (a) Inorder (Left, Root, Right)
+        #L Ro Ri: Left > root > right
+
+        # process left tree first
+        if self.left is None:
+            print(self.value)
+        else:
+            self.left.in_order_print()
+        
+        # root
+        if self.left != None:
+            print(self.value)
+
+        # go right
+        if self.right !=None:
+            self.right.in_order_print()
+
+
 
     # Print the value of every node, starting with the given node,
     # in an iterative breadth first traversal
+    # this can't be done recursively as not a sub problem. Has to be iteratively.
     def bft_print(self):
-        pass
+        #create a queue to keep track of nodes being processed
+        node_queue = Queue()
+
+        #push self into queue
+        node_queue.enqueue(self)
+
+        #while queue not empty
+        while len(node_queue) != 0:
+            #remove the first node from the queue
+            current_node = node_queue.dequeue()
+            #print the removed node
+            print(current_node.value)
+            #add all children of that node into the queue
+            if current_node.left != None:
+                node_queue.enqueue(current_node.left)
+            if current_node.right !=None:
+                node_queue.enqueue(current_node.right)
 
     # Print the value of every node, starting with the given node,
     # in an iterative depth first traversal
     def dft_print(self):
-        pass
+        #create a stack to keep track of nodes being processed
+        #for traversal, use call stack instead.
+        stack = []
+        #push self into stack
+        stack.append(self)
+
+       #while something in the stack (not done processing all nodes) 
+        while len(stack) > 0:
+            node = stack.pop()
+            print(node.value)
+            if node.left:
+                stack.append(node.left)
+                #recursively call self.left.dft_print()
+            if node.right:
+                stack.append(node.right)
+
+        #use existing for_each as a reference to traversal logic
+
 
     # Stretch Goals -------------------------
     # Note: Research may be required
 
     # Print Pre-order recursive DFT
     def pre_order_dft(self):
-        pass
+    # (b) Preorder (Root, Left, Right)
+        #root
+        print(self.value)
+
+        # process left tree
+        if self.left != None:
+            self.left.pre_order_dft()
+        
+        # go right
+        if self.right != None:
+            self.right.pre_order_dft()
+
+
 
     # Print Post-order recursive DFT
     def post_order_dft(self):
-        pass
+    # (c) Postorder (Left, Right, Root)
+
+
+        #left
+        if self.left != None:
+            self.left.post_order_dft()
+
+        #right
+        if self.right != None:
+            self.right.post_order_dft()
+
+        #print the node which could be left, right or root after the conditions
+        print(self.value)
+
+
 
 """
 This code is necessary for testing the `print` methods
@@ -126,6 +233,6 @@ print("elegant methods")
 print("pre order")
 bst.pre_order_dft()
 print("in order")
-bst.in_order_print() # bst.in_order_dft()
+bst.in_order_print()
 print("post order")
 bst.post_order_dft()  
